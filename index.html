@@ -1,10 +1,156 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>TechLore</title>
-  </head>
-  <body>
-    <h1>Welcome to TechLore</h1>
-    <p>This is your gateway to agency.</p>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Friendship Arena</title>
+    <style>
+        body {
+            background: #050509;
+            color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #app {
+            width: 420px;
+            padding: 24px;
+            background: #0b0b12;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #000;
+        }
+        h1 {
+            margin-top: 0;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .section {
+            margin-top: 18px;
+            padding-top: 12px;
+            border-top: 1px solid #222;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #111;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 14px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #222;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 6px;
+        }
+        button:hover {
+            background: #333;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #8f8;
+            min-height: 16px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <h1>FRIENDSHIP ARENA</h1>
+
+    <div class="section">
+        <label>Join code</label>
+        <input id="joinCodeInput" placeholder="Enter code to join">
+        <button onclick="joinRoom()">Join</button>
+        <button onclick="createRoom()">Create code</button>
+        <div id="status"></div>
+    </div>
+
+    <div class="section">
+        <label>Shared Message (syncs across computers)</label>
+        <input id="sharedInput" placeholder="Type something">
+        <button onclick="updateShared()">Update</button>
+        <div id="sharedDisplay"></div>
+    </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+<script>
+    // Your Firebase config (from your screenshot)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAig87VBdzM88GUjNbnFIOatz8ghSuSNRM",
+      authDomain: "friendship-arena.firebaseapp.com",
+      projectId: "friendship-arena",
+      storageBucket: "friendship-arena.firebasestorage.app",
+      messagingSenderId: "91772668718",
+      appId: "1:91772668718:web:b54eb29f5a10c5d9ccc8bf",
+      measurementId: "G-9XPZ49YVF8"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentRoom = null;
+
+    function createRoom() {
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        currentRoom = code;
+
+        db.ref("rooms/" + code).set({
+            shared: "Room created"
+        });
+
+        document.getElementById('status').textContent =
+            "Created room: " + code;
+        listenToRoom();
+    }
+
+    function joinRoom() {
+        const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+        if (!code) {
+            document.getElementById('status').textContent = "Enter a code first.";
+            return;
+        }
+
+        currentRoom = code;
+        document.getElementById('status').textContent =
+            "Joined room: " + code;
+
+        listenToRoom();
+    }
+
+    function updateShared() {
+        if (!currentRoom) return;
+
+        const text = document.getElementById('sharedInput').value;
+        db.ref("rooms/" + currentRoom).update({
+            shared: text
+        });
+    }
+
+    function listenToRoom() {
+        db.ref("rooms/" + currentRoom + "/shared").on("value", snapshot => {
+            document.getElementById('sharedDisplay').textContent =
+                "Shared: " + snapshot.val();
+        });
+    }
+</script>
+</body>
 </html>
