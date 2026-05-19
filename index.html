@@ -88,12 +88,11 @@
     </div>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase v8 (works with firebase.database()) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-    // Your Firebase config (from your screenshot)
     const firebaseConfig = {
       apiKey: "AIzaSyAig87VBdzM88GUjNbnFIOatz8ghSuSNRM",
       authDomain: "friendship-arena.firebaseapp.com",
@@ -104,53 +103,10 @@
       measurementId: "G-9XPZ49YVF8"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+</script>
 
-    let currentRoom = null;
-
-    function createRoom() {
-        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-        currentRoom = code;
-
-        db.ref("rooms/" + code).set({
-            shared: "Room created"
-        });
-
-        document.getElementById('status').textContent =
-            "Created room: " + code;
-        listenToRoom();
-    }
-
-    function joinRoom() {
-        const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-        if (!code) {
-            document.getElementById('status').textContent = "Enter a code first.";
-            return;
-        }
-
-        currentRoom = code;
-        document.getElementById('status').textContent =
-            "Joined room: " + code;
-
-        listenToRoom();
-    }
-
-    function updateShared() {
-        if (!currentRoom) return;
-
-        const text = document.getElementById('sharedInput').value;
-        db.ref("rooms/" + currentRoom).update({
-            shared: text
-        });
-    }
-
-    function listenToRoom() {
-        db.ref("rooms/" + currentRoom + "/shared").on("value", snapshot => {
-            document.getElementById('sharedDisplay').textContent =
-                "Shared: " + snapshot.val();
-        });
-    }
 </script>
 </body>
 </html>
